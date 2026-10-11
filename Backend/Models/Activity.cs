@@ -19,9 +19,6 @@ namespace Backend.Models
         
         public string MaterialsNeeded { get; set; } = string.Empty;
         
-        [MaxLength(250)]
-        public string SafetyInstructions { get; set; } = string.Empty;
-
         public bool IsCompleted { get; set; } = false;
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();

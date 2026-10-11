@@ -38,11 +38,6 @@ namespace KerkPlanner.Api.Migrations
                     b.Property<int>("RequiredVolunteers")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("SafetyInstructions")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../../@/lib/api';
+import { api } from '../lib/api';
 import { jwtDecode } from 'jwt-decode';
 
 export interface Enrollment {
@@ -21,7 +21,6 @@ export interface Activity {
   description: string;
   requiredVolunteers: number;
   materialsNeeded: string;
-  safetyInstructions: string;
   isCompleted: boolean;
 }
 

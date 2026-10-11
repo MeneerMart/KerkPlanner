@@ -16,7 +16,7 @@ namespace Backend.DTOs
         public string? Remarks { get; set; }
     }
 
-    public record ActivityDto(Guid Id, string Title, string Description, int RequiredVolunteers, string MaterialsNeeded, string SafetyInstructions, bool IsCompleted);
+    public record ActivityDto(Guid Id, string Title, string Description, int RequiredVolunteers, string MaterialsNeeded, bool IsCompleted);
     public record WorkDayDto(Guid Id, DateTime Date, List<ActivityDto> Activities, List<EnrollmentDto> Enrollments);
 }
 
@@ -37,6 +37,5 @@ public record CreateActivityDto(
     string Title, 
     string Description, 
     int RequiredVolunteers, 
-    string MaterialsNeeded, 
-    string SafetyInstructions
+    string MaterialsNeeded
 );

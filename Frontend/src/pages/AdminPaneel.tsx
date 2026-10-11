@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useAppStore } from '../../src/store/useAppStore';
-import { Card, CardContent, CardHeader, CardTitle } from '../../@/components/ui/card';
-import { Button } from '../../@/components/ui/button';
-import { Input } from '../../@/components/ui/input';
-import { Label } from '../../@/components/ui/label';
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '../../@/components/ui/dialog';
-import { Field, FieldGroup } from '../../@/components/ui/field';
+import { useAppStore } from '../store/useAppStore';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '../components/ui/dialog';
+import { Field, FieldGroup } from '../components/ui/field';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { Trash2, Edit, Plus } from 'lucide-react';
@@ -132,7 +132,7 @@ export default function AdminPaneel() {
       </div>
 
       <Card>
-        <CardHeader className="pb-3"><CardTitle className="text-md">Nieuwe werkdag inplannen</CardTitle></CardHeader>
+        <CardHeader className="pb-3"><CardTitle className="text-base">Nieuwe werkdag inplannen</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleCreateWorkDay} className="flex flex-col sm:flex-row gap-3 items-end">
             <div className="w-full sm:flex-1 space-y-1">
@@ -163,7 +163,7 @@ export default function AdminPaneel() {
                 <Card key={activity.id} className="border-l-4 border-l-blue-600">
                   <CardHeader className="pb-2 flex flex-row justify-between items-start">
                     <div>
-                      <CardTitle className="text-md text-slate-800">{activity.title}</CardTitle>
+                      <CardTitle className="text-base text-slate-800">{activity.title}</CardTitle>
                       <p className="text-xs text-slate-500 mt-1">Capaciteit: {activity.requiredVolunteers} personen</p>
                     </div>
                     <div className="flex gap-1">

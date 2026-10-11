@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { useAppStore } from '../src/store/useAppStore';
-import Login from '../src/pages/Login';
-import Dashboard from '../src/pages/Dashboard';
-import AdminPaneel from '../src/pages/AdminPaneel';
+import { useAppStore } from './store/useAppStore';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import AdminPaneel from './pages/AdminPaneel';
 
 function Navbar() {
   const { token, role, firstName, logout } = useAppStore();

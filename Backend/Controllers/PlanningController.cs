@@ -34,7 +34,7 @@ namespace Backend.Controllers
             var result = workDays.Select(w => new WorkDayDto(
                 w.Id,
                 w.Date,
-                w.Activities.Select(a => new ActivityDto(a.Id, a.Title, a.Description, a.RequiredVolunteers, a.MaterialsNeeded, a.SafetyInstructions, a.IsCompleted)).ToList(),
+                w.Activities.Select(a => new ActivityDto(a.Id, a.Title, a.Description, a.RequiredVolunteers, a.MaterialsNeeded, a.IsCompleted)).ToList(),
                 w.Enrollments.Select(e =>
                 {
                     // Mag de ingelogde gebruiker alles zien? (Alleen als je Admin bent OF als het je eigen inschrijving is)
@@ -157,7 +157,6 @@ namespace Backend.Controllers
                 Description = dto.Description ?? "",
                 RequiredVolunteers = dto.RequiredVolunteers,
                 MaterialsNeeded = dto.MaterialsNeeded ?? "",
-                SafetyInstructions = dto.SafetyInstructions ?? ""
             };
 
             _context.Activities.Add(activity);
