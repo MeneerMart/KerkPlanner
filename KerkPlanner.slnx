@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KerkPlanner.Api/KerkPlanner.Api.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,29 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+artifacts/
+
+## IDE
+.vs/
+.idea/
+*.swp
+
+## Secrets / local env
+appsettings.*.local.json
+*.pfx
+
+## Frontend (later)
+node_modules/
+dist/
+.vercel
+.env
+.env.local
+
+## OS
+Thumbs.db
+Desktop.ini
