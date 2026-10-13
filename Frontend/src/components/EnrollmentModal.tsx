@@ -17,13 +17,13 @@ import { ConfirmDialog } from './ui/confirm-dialog';
 import { toast } from 'sonner';
 
 function getWhatsAppUrl(day: WorkDay, title: string): string {
-  // Dit is het afgesproken WhatsApp-nummer van Henk.
-  const configuredPhone = '0634239485';
+  // Dit is het afgesproken WhatsApp-nummer van Nathan.
+  const configuredPhone = '0611076154';
   let phone = configuredPhone.replace(/\D/g, '');
   if (phone.startsWith('00')) phone = phone.slice(2);
   if (phone.startsWith('0')) phone = `31${phone.slice(1)}`;
   const date = format(new Date(day.date), 'EEEE d MMMM', { locale: nl });
-  const message = `Hoi Henk, ik wil graag meer informatie of me laten inschrijven voor "${title}" op ${date}.`;
+  const message = `Hoi Nathan, ik wil graag meer informatie of me laten inschrijven voor "${title}" op ${date}.`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
@@ -121,7 +121,7 @@ export function EnrollmentModal({
           Inloggen om aan te melden
         </Button>
         <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-800 hover:bg-emerald-100">
-          <MessageCircle className="h-4 w-4 shrink-0" /> Voor meer informatie of inschrijven, app Henk (0634239485)
+          <MessageCircle className="h-4 w-4 shrink-0" /> Voor meer informatie of inschrijven, app Nathan van Wijk (0611076154)
         </a>
       </div>
     );

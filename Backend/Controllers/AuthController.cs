@@ -26,12 +26,13 @@ namespace Backend.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            var email = NormalizeEmail(dto.Email);
+            if (await _context.Users.AnyAsync(u => u.Email.ToLower() == email))
                 return BadRequest("Er bestaat al een account met dit e-mailadres.");
 
             var user = new User
             {
-                Email = dto.Email,
+                Email = email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 PhoneNumber = dto.PhoneNumber,
@@ -44,10 +45,15 @@ namespace Backend.Controllers
             return Ok();
         }
 
+        // Telefoons zetten vaak een hoofdletter aan het begin; e-mail is in de praktijk niet hoofdlettergevoelig.
+        private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);            
+            // ToLower op de kolom zodat ook oudere accounts met hoofdletters kunnen inloggen.
+            var email = NormalizeEmail(dto.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 return Unauthorized("Ongeldige inloggegevens.");
 
