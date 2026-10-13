@@ -80,28 +80,43 @@ using (var scope = app.Services.CreateScope())
     // WAL werkt niet betrouwbaar op netwerkopslag zoals Azure /home; gebruik de standaard journal.
     dbContext.Database.ExecuteSqlRaw("PRAGMA journal_mode=DELETE;");
 
-    // Maak de eerste beheerder aan als die nog niet bestaat en er een wachtwoord is ingesteld.
-    if (!dbContext.Users.Any(u => u.Role == "Admin"))
-    {
-        var adminEmail = app.Configuration["Admin:Email"];
-        var adminPassword = app.Configuration["Admin:Password"];
-        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
-        {
-            app.Logger.LogWarning("Er is nog geen beheerder. Stel Admin:Email en Admin:Password in om er een aan te maken.");
-        }
-        else
-        {
-            dbContext.Users.Add(new Backend.Models.User
-            {
-                Email = adminEmail.Trim(),
-                FirstName = "Admin",
-                LastName = "Kerk",
-                Role = "Admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword)
-            });
-            dbContext.SaveChanges();
-        }
-    }
+    EnsureConfiguredAdmin(dbContext, app.Configuration, app.Logger);
 }
 
 app.Run();
+
+// Als Admin:Email en Admin:Password zijn ingesteld, zijn die leidend: het account wordt aangemaakt
+// of bijgewerkt (rol Admin, wachtwoord uit de config). Zonder wachtwoord in de config verandert er niets.
+static void EnsureConfiguredAdmin(AppDbContext dbContext, IConfiguration configuration, ILogger logger)
+{
+    var adminEmail = configuration["Admin:Email"]?.Trim();
+    var adminPassword = configuration["Admin:Password"];
+    if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+    {
+        if (!dbContext.Users.Any(u => u.Role == "Admin"))
+            logger.LogWarning("Er is nog geen beheerder. Stel Admin:Email en Admin:Password in om er een aan te maken.");
+        return;
+    }
+
+    var normalizedEmail = adminEmail.ToLower();
+    var admin = dbContext.Users.FirstOrDefault(u => u.Email.ToLower() == normalizedEmail);
+    if (admin == null)
+    {
+        dbContext.Users.Add(new Backend.Models.User
+        {
+            Email = adminEmail,
+            FirstName = "Admin",
+            LastName = "Kerk",
+            Role = "Admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword)
+        });
+        logger.LogInformation("Beheerder {Email} aangemaakt.", adminEmail);
+    }
+    else
+    {
+        admin.Role = "Admin";
+        if (!BCrypt.Net.BCrypt.Verify(adminPassword, admin.PasswordHash))
+            admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+    }
+    dbContext.SaveChanges();
+}
