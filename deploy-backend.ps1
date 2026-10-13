@@ -19,8 +19,11 @@ if ($LASTEXITCODE -ne 0) { throw 'dotnet publish is mislukt.' }
 # Lokale databasebestanden nooit meesturen; de productiedatabase staat in /home/data.
 Get-ChildItem $publishDir -Filter '*.db*' | Remove-Item -Force
 
-Compress-Archive -Path (Join-Path $publishDir '*') -DestinationPath $zipPath
-az webapp deploy --resource-group $ResourceGroup --name $AppName --src-path $zipPath --type zip
+# Geen Compress-Archive/ZipFile: in Windows PowerShell 5.1 schrijven die backslashes in de zip,
+# waardoor uitpakken op Linux mislukt. De ingebouwde tar.exe gebruikt wel forward slashes.
+& "$env:SystemRoot\System32\tar.exe" -a -c -f $zipPath -C $publishDir .
+if ($LASTEXITCODE -ne 0) { throw 'Zip maken is mislukt.' }
+az webapp deploy --resource-group $ResourceGroup --name $AppName --src-path $zipPath --type zip --clean true
 if ($LASTEXITCODE -ne 0) { throw 'az webapp deploy is mislukt.' }
 
 Write-Host "Klaar. Controleer: https://$AppName.azurewebsites.net/health"
