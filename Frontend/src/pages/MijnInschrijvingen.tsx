@@ -1,10 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { nl } from 'date-fns/locale';
 import { CalendarDays, ClipboardList } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { formatToolQuantities } from '../lib/tools';
+import { formatDay, timeSlotLabel } from '../lib/format';
 import { EnrollmentModal } from '../components/EnrollmentModal';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -64,9 +63,11 @@ export default function MijnInschrijvingen() {
               <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">
                   <h3 className="font-semibold text-slate-800">{activity?.title ?? 'Algemeen beschikbaar'}</h3>
-                  <p className="text-sm text-slate-500">{format(new Date(day.date), 'EEEE d MMMM yyyy', { locale: nl })}</p>
+                  <p className="text-sm text-slate-500">{formatDay(day.date)} · {timeSlotLabel(enrollment.timeSlot).toLowerCase()}</p>
                   {enrollment.selectedTools && <p className="text-sm text-slate-600">Gereedschap: {formatToolQuantities(enrollment.selectedTools) || 'geen'}</p>}
+                  {enrollment.specificSkills && <p className="text-sm text-slate-600">Vaardigheden: {enrollment.specificSkills}</p>}
                   {enrollment.remarks && <p className="text-sm text-slate-600">Opmerking: {enrollment.remarks}</p>}
+                  {enrollment.bringsVehicle && <p className="text-xs text-slate-500">Neemt busje/aanhanger mee</p>}
                 </div>
                 <div className="w-full sm:w-56">
                   <EnrollmentModal

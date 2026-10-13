@@ -27,6 +27,10 @@ namespace Backend.Models
         public Guid? ActivityId { get; set; }
         public Activity? Activity { get; set; }
 
+        // Hele dag, ochtend, middag of avond (zie TimeSlots).
+        [MaxLength(20)]
+        public string TimeSlot { get; set; } = TimeSlots.FullDay;
+
         public bool BringsVehicle { get; set; }
         public bool BringsTools { get; set; }
         public string SelectedTools { get; set; } = string.Empty;

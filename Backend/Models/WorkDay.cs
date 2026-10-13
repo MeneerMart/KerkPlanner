@@ -9,14 +9,15 @@ namespace Backend.Models
         [Required]
         public DateTime Date { get; set; }
 
-        public Guid? CoordinatorId { get; set; }
-        public User? Coordinator { get; set; }
+        // Vrije tekst, zodat ook iemand zonder account verantwoordelijke kan zijn.
+        [MaxLength(100)]
+        public string CoordinatorName { get; set; } = string.Empty;
 
-        public Guid? OpenerId { get; set; }
-        public User? Opener { get; set; }
+        [MaxLength(100)]
+        public string OpenerName { get; set; } = string.Empty;
 
-        public Guid? CloserId { get; set; }
-        public User? Closer { get; set; }
+        [MaxLength(100)]
+        public string CloserName { get; set; } = string.Empty;
 
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();

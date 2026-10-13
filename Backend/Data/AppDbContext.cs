@@ -17,25 +17,6 @@ namespace Backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Voorkom 'Multiple Cascade Paths' errors bij de User relaties op WorkDay
-            modelBuilder.Entity<WorkDay>()
-                .HasOne(w => w.Coordinator)
-                .WithMany()
-                .HasForeignKey(w => w.CoordinatorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<WorkDay>()
-                .HasOne(w => w.Opener)
-                .WithMany()
-                .HasForeignKey(w => w.OpenerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<WorkDay>()
-                .HasOne(w => w.Closer)
-                .WithMany()
-                .HasForeignKey(w => w.CloserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Een inschrijving kan bij een account horen, maar ook een handmatig toegevoegde gast zijn.
             modelBuilder.Entity<Enrollment>()
                 .HasOne(e => e.User)

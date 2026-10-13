@@ -18,6 +18,12 @@ namespace Backend.Models
         public int RequiredVolunteers { get; set; }
         
         public string MaterialsNeeded { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string SafetyInstructions { get; set; } = string.Empty;
+
+        // Geschatte tijdsduur in minuten; null als die niet bekend is.
+        public int? EstimatedDurationMinutes { get; set; }
         
         public bool IsCompleted { get; set; } = false;
 

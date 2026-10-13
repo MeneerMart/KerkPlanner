@@ -5,12 +5,14 @@ import { nl } from 'date-fns/locale';
 import { MessageCircle, Pencil } from 'lucide-react';
 import { useAppStore, type Activity, type Enrollment, type WorkDay } from '../store/useAppStore';
 import { capToolQuantities, parseToolQuantities, type ToolQuantities } from '../lib/tools';
+import { errorMessage } from '../lib/errors';
 import ToolsPicker from './ToolsPicker';
+import ActivityInfo from './ActivityInfo';
+import EnrollmentDetailsFields from './EnrollmentDetailsFields';
+import { emptyEnrollmentDetails, type EnrollmentDetails } from '../lib/enrollmentDetails';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Field, FieldGroup } from './ui/field';
+import { FieldGroup } from './ui/field';
 import { ConfirmDialog } from './ui/confirm-dialog';
 import { toast } from 'sonner';
 
@@ -42,7 +44,7 @@ export function EnrollmentModal({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [selectedTools, setSelectedTools] = useState<ToolQuantities>({});
-  const [remarks, setRemarks] = useState('');
+  const [details, setDetails] = useState<EnrollmentDetails>(emptyEnrollmentDetails);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [confirmation, setConfirmation] = useState<'delete' | null>(null);
@@ -53,7 +55,12 @@ export function EnrollmentModal({
     if (nextOpen) {
       setError('');
       setSelectedTools(parseToolQuantities(existingEnrollment?.selectedTools));
-      setRemarks(existingEnrollment?.remarks ?? '');
+      setDetails(existingEnrollment ? {
+        timeSlot: existingEnrollment.timeSlot ?? 'FullDay',
+        bringsVehicle: existingEnrollment.bringsVehicle ?? false,
+        specificSkills: existingEnrollment.specificSkills ?? '',
+        remarks: existingEnrollment.remarks ?? '',
+      } : emptyEnrollmentDetails);
     }
     setOpen(nextOpen);
   };
@@ -72,9 +79,8 @@ export function EnrollmentModal({
     const payload = {
       workDayId: day.id,
       activityId: activity?.id ?? null,
-      bringsVehicle: false,
+      ...details,
       selectedTools: JSON.stringify(capToolQuantities(activity?.materialsNeeded, selectedTools, activity?.toolsProvided, existingEnrollment?.selectedTools)),
-      remarks,
     };
     try {
       if (existingEnrollment) {
@@ -87,7 +93,7 @@ export function EnrollmentModal({
       setOpen(false);
     } catch (requestError: unknown) {
       toast.error('Opslaan is niet gelukt. Probeer het opnieuw.');
-      setError(typeof requestError === 'object' && requestError !== null && 'response' in requestError && typeof (requestError as { response?: { data?: unknown } }).response?.data === 'string' ? (requestError as { response: { data: string } }).response.data : 'Opslaan is niet gelukt. Probeer het opnieuw.');
+      setError(errorMessage(requestError, 'Opslaan is niet gelukt. Probeer het opnieuw.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -133,11 +139,12 @@ export function EnrollmentModal({
           <DialogHeader>
             <DialogTitle>{existingEnrollment ? 'Aanmelding wijzigen' : 'Aanmelden'}</DialogTitle>
             <DialogDescription>
-              {existingEnrollment ? 'Pas je gegevens en het gereedschap dat je meeneemt aan.' : <>Je meldt je aan voor: <strong className="text-slate-800">{title}</strong>.</>}
+              {existingEnrollment ? <>Pas je aanmelding voor <strong className="text-slate-800">{title}</strong> aan.</> : <>Je meldt je aan voor: <strong className="text-slate-800">{title}</strong>.</>}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <FieldGroup className="space-y-4 py-4">
+              {activity && (activity.safetyInstructions || activity.estimatedDurationMinutes) ? <div className="text-sm"><ActivityInfo activity={{ ...activity, description: '' }} showTools={false} /></div> : null}
               <ToolsPicker
                 materialsNeeded={activity?.materialsNeeded}
                 toolsProvided={activity?.toolsProvided}
@@ -146,13 +153,10 @@ export function EnrollmentModal({
                 onChange={setSelectedTools}
                 excludeEnrollmentId={existingEnrollment?.id}
               />
-              <Field>
-                <Label htmlFor={`remarks-${day.id}-${activity?.id ?? 'general'}`}>Opmerking (optioneel)</Label>
-                <Input id={`remarks-${day.id}-${activity?.id ?? 'general'}`} placeholder="Bijv. ik kan pas vanaf 10:00 uur" value={remarks} onChange={event => setRemarks(event.target.value)} />
-              </Field>
+              <EnrollmentDetailsFields idPrefix={`enroll-${day.id}-${activity?.id ?? 'general'}`} value={details} onChange={setDetails} />
               {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             </FieldGroup>
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter>
               {existingEnrollment && <Button type="button" variant="ghost" disabled={isSubmitting} onClick={() => setConfirmation('delete')} className="mr-auto text-red-600 hover:text-red-700">Inschrijving verwijderen</Button>}
               <DialogClose render={<Button variant="outline" type="button">Annuleren</Button>} />
               <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">{isSubmitting ? 'Bezig...' : 'Opslaan'}</Button>
