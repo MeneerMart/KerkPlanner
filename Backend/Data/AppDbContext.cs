@@ -36,6 +36,13 @@ namespace Backend.Data
                 .HasForeignKey(w => w.CloserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Een inschrijving kan bij een account horen, maar ook een handmatig toegevoegde gast zijn.
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.User)
+                .WithMany(u => u.Enrollments)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Voorkom cascade conflicten bij Enrollments
             modelBuilder.Entity<Enrollment>()
                 .HasOne(e => e.WorkDay)

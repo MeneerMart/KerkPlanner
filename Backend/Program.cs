@@ -3,19 +3,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Backend.Data;
+using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Database configuratie
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHostedService<PastWorkDayCleanupService>();
 
 // 2. CORS configuratie (Sta localhost en (straks) Vercel toe)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Vite default poort
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://192.168.163.151:5173"
+            )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -60,7 +66,8 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    
+    dbContext.Database.Migrate();
+
     // Check of er al een admin bestaat, zo niet: aanmaken
     if (!dbContext.Users.Any(u => u.Role == "Admin"))
     {

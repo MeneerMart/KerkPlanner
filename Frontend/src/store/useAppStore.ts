@@ -4,10 +4,12 @@ import { jwtDecode } from 'jwt-decode';
 
 export interface Enrollment {
   id: string;
+  userId: string | null;
   activityId: string | null;
   workDayId: string;
   firstName: string;
   lastName?: string | null;
+  phoneNumber?: string | null;
   bringsVehicle?: boolean | null;
   bringsTools?: boolean | null;
   selectedTools?: string | null;
@@ -22,6 +24,7 @@ export interface Activity {
   requiredVolunteers: number;
   materialsNeeded: string;
   isCompleted: boolean;
+  toolsProvided: string;
 }
 
 export interface WorkDay {
@@ -29,6 +32,33 @@ export interface WorkDay {
   date: string;
   activities: Activity[];
   enrollments: Enrollment[];
+}
+
+export interface UserOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string | null;
+}
+
+export interface EnrollmentPayload {
+  workDayId: string;
+  activityId: string | null;
+  bringsVehicle: boolean;
+  selectedTools: string;
+  specificSkills?: string;
+  remarks: string;
+}
+
+export interface AdminEnrollmentPayload extends EnrollmentPayload {
+  userId: string;
+}
+
+export interface AdminGuestEnrollmentPayload extends EnrollmentPayload {
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
 }
 
 interface AuthState {
@@ -40,49 +70,58 @@ interface AuthState {
 
 interface AppStore extends AuthState {
   workDays: WorkDay[];
+  users: UserOption[];
   isLoading: boolean;
-  
   login: (token: string, firstName: string, role: string) => void;
   logout: () => void;
   fetchPlanning: () => Promise<void>;
-  enroll: (data: any) => Promise<void>;
+  fetchUsers: () => Promise<void>;
+  enroll: (data: EnrollmentPayload) => Promise<void>;
+  updateEnrollment: (id: string, data: EnrollmentPayload) => Promise<void>;
+  deleteEnrollment: (id: string) => Promise<void>;
+  adminEnroll: (data: AdminEnrollmentPayload) => Promise<void>;
+  adminEnrollGuest: (data: AdminGuestEnrollmentPayload) => Promise<void>;
   createWorkDay: (date: string) => Promise<void>;
   deleteWorkDay: (id: string) => Promise<void>;
-  createActivity: (activityData: any) => Promise<void>;
-  updateActivity: (id: string, activityData: any) => Promise<void>;
+  createActivity: (activityData: Record<string, unknown>) => Promise<void>;
+  updateActivity: (id: string, activityData: Record<string, unknown>) => Promise<void>;
   deleteActivity: (id: string) => Promise<void>;
+}
+
+function getInitialUserId(token: string | null): string | null {
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode<Record<string, unknown>>(token);
+    const id = decoded.nameid ?? decoded.sub ?? decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+    return typeof id === 'string' ? id : null;
+  } catch {
+    return null;
+  }
 }
 
 export const useAppStore = create<AppStore>((set, get) => {
   const token = localStorage.getItem('token');
-  let initialUserId = null;
-  if (token) {
-    try { initialUserId = (jwtDecode(token) as any).nameid; } catch { }
-  }
-
   return {
-    token: token,
+    token,
     firstName: localStorage.getItem('firstName'),
     role: localStorage.getItem('role'),
-    userId: initialUserId,
-    
+    userId: getInitialUserId(token),
     workDays: [],
+    users: [],
     isLoading: false,
 
-    login: (token, firstName, role) => {
-      localStorage.setItem('token', token);
+    login: (newToken, firstName, role) => {
+      localStorage.setItem('token', newToken);
       localStorage.setItem('firstName', firstName);
       localStorage.setItem('role', role);
-      
-      const decoded: any = jwtDecode(token);
-      set({ token, firstName, role, userId: decoded.nameid });
+      set({ token: newToken, firstName, role, userId: getInitialUserId(newToken) });
     },
 
     logout: () => {
       localStorage.removeItem('token');
       localStorage.removeItem('firstName');
       localStorage.removeItem('role');
-      set({ token: null, firstName: null, role: null, userId: null, workDays: [] });
+      set({ token: null, firstName: null, role: null, userId: null, workDays: [], users: [] });
     },
 
     fetchPlanning: async () => {
@@ -91,17 +130,67 @@ export const useAppStore = create<AppStore>((set, get) => {
         const response = await api.get<WorkDay[]>('/planning');
         set({ workDays: response.data, isLoading: false });
       } catch (error) {
-        console.error("Fout bij ophalen planning", error);
+        console.error('Fout bij ophalen planning', error);
         set({ isLoading: false });
       }
     },
 
-    enroll: async (enrollmentData) => {
+    fetchUsers: async () => {
       try {
-        await api.post('/planning/enroll', enrollmentData);
+        const response = await api.get<UserOption[]>('/planning/users');
+        set({ users: response.data });
+      } catch (error) {
+        console.error('Fout bij ophalen gebruikers', error);
+        throw error;
+      }
+    },
+
+    enroll: async (data) => {
+      try {
+        await api.post('/planning/enroll', data);
         await get().fetchPlanning();
       } catch (error) {
-        console.error("Inschrijven mislukt", error);
+        console.error('Inschrijven mislukt', error);
+        throw error;
+      }
+    },
+
+    updateEnrollment: async (id, data) => {
+      try {
+        await api.put(`/planning/enroll/${id}`, data);
+        await get().fetchPlanning();
+      } catch (error) {
+        console.error('Wijzigen inschrijving mislukt', error);
+        throw error;
+      }
+    },
+
+    deleteEnrollment: async (id) => {
+      try {
+        await api.delete(`/planning/enroll/${id}`);
+        await get().fetchPlanning();
+      } catch (error) {
+        console.error('Verwijderen inschrijving mislukt', error);
+        throw error;
+      }
+    },
+
+    adminEnroll: async (data) => {
+      try {
+        await api.post('/planning/enroll/admin', data);
+        await get().fetchPlanning();
+      } catch (error) {
+        console.error('Inschrijving door beheerder mislukt', error);
+        throw error;
+      }
+    },
+
+    adminEnrollGuest: async (data) => {
+      try {
+        await api.post('/planning/enroll/admin/guest', data);
+        await get().fetchPlanning();
+      } catch (error) {
+        console.error('Gastinschrijving door beheerder mislukt', error);
         throw error;
       }
     },
@@ -109,9 +198,9 @@ export const useAppStore = create<AppStore>((set, get) => {
     createWorkDay: async (date) => {
       try {
         await api.post('/planning/workday', { date });
-        await get().fetchPlanning(); // Herlaad direct de dagen!
+        await get().fetchPlanning();
       } catch (error) {
-        console.error("Fout bij aanmaken werkdag", error);
+        console.error('Fout bij aanmaken werkdag', error);
         throw error;
       }
     },
@@ -124,9 +213,9 @@ export const useAppStore = create<AppStore>((set, get) => {
     createActivity: async (activityData) => {
       try {
         await api.post('/planning/activity', activityData);
-        await get().fetchPlanning(); // Herlaad direct de activiteiten!
+        await get().fetchPlanning();
       } catch (error) {
-        console.error("Fout bij aanmaken activiteit", error);
+        console.error('Fout bij aanmaken activiteit', error);
         throw error;
       }
     },
