@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// Let op: Check in je Backend terminal (als je 'dotnet run' typt) of deze poort klopt!
-// Meestal is dit https://localhost:7193 of http://localhost:5000 of iets vergelijkbaars.
+// In productie komt het adres uit VITE_API_URL (bijv. https://<app>.azurewebsites.net/api).
+// Lokaal valt het terug op de backend op poort 5114 van dezelfde machine.
 export const api = axios.create({
-  baseURL: `http://${window.location.hostname}:5114/api`,
+  baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5114/api`,
 });
 
 // Voeg de JWT token automatisch toe aan elke request
