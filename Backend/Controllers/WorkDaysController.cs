@@ -39,9 +39,12 @@ namespace Backend.Controllers
                 w.Date,
                 w.CoordinatorName,
                 w.OpenerName,
+                w.OpenTime,
                 w.CloserName,
-                w.Activities.Select(a => new ActivityDto(
-                    a.Id, a.Title, a.Description, a.RequiredVolunteers, a.MaterialsNeeded, a.SafetyInstructions,
+                w.CloseTime,
+                // Hele-dag-taken eerst, daarna op begintijd ("HH:mm" sorteert als tekst chronologisch).
+                w.Activities.OrderBy(a => a.StartTime ?? string.Empty).ThenBy(a => a.Title).Select(a => new ActivityDto(
+                    a.Id, a.Title, a.Description, a.RequiredVolunteers, a.StartTime, a.EndTime, a.MaterialsNeeded, a.SafetyInstructions,
                     a.EstimatedDurationMinutes, a.IsCompleted,
                     ToolTotals.Calculate(w.Enrollments.Where(e => e.ActivityId == a.Id)))).ToList(),
                 w.Enrollments.Select(e => ToDto(e, isAdmin || e.UserId == currentUserId, isAdmin)).ToList()
@@ -107,10 +110,14 @@ namespace Backend.Controllers
             var closer = dto.CloserName?.Trim() ?? string.Empty;
             if (coordinator.Length > MaxNameLength || opener.Length > MaxNameLength || closer.Length > MaxNameLength)
                 return BadRequest($"Namen mogen maximaal {MaxNameLength} tekens bevatten.");
+            if (!TimeOfDay.TryNormalize(dto.OpenTime, out var openTime) || !TimeOfDay.TryNormalize(dto.CloseTime, out var closeTime))
+                return BadRequest("Vul een geldige tijd in (uu:mm).");
 
             workDay.CoordinatorName = coordinator;
             workDay.OpenerName = opener;
+            workDay.OpenTime = openTime ?? string.Empty;
             workDay.CloserName = closer;
+            workDay.CloseTime = closeTime ?? string.Empty;
             await _context.SaveChangesAsync();
             return NoContent();
         }

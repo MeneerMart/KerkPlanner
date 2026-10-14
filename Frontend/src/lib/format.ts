@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import type { TimeSlot } from '../store/types';
+import type { Activity, TimeSlot } from '../store/types';
 
 export const TIME_SLOTS: { value: TimeSlot; label: string }[] = [
   { value: 'FullDay', label: 'Hele dag' },
@@ -18,6 +18,15 @@ export function nameWithTimeSlot(enrollment: { firstName: string; timeSlot?: Tim
   return enrollment.timeSlot && enrollment.timeSlot !== 'FullDay'
     ? `${enrollment.firstName} (${timeSlotLabel(enrollment.timeSlot).toLowerCase()})`
     : enrollment.firstName;
+}
+
+/** "09:00 – 12:00", of "Hele dag" als de taak geen tijdstip heeft. */
+export function formatActivityTime(activity: Pick<Activity, 'startTime' | 'endTime'>): string {
+  return activity.startTime && activity.endTime ? `${activity.startTime} – ${activity.endTime}` : 'Hele dag';
+}
+
+export function hasNoLimit(activity: Pick<Activity, 'requiredVolunteers'>): boolean {
+  return activity.requiredVolunteers <= 0;
 }
 
 /** 90 → "1 uur 30 min", 45 → "45 min". */

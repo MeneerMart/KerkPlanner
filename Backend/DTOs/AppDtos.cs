@@ -18,8 +18,8 @@ namespace Backend.DTOs
         public string? Remarks { get; set; }
     }
 
-    public record ActivityDto(Guid Id, string Title, string Description, int RequiredVolunteers, string MaterialsNeeded, string SafetyInstructions, int? EstimatedDurationMinutes, bool IsCompleted, string ToolsProvided);
-    public record WorkDayDto(Guid Id, DateTime Date, string CoordinatorName, string OpenerName, string CloserName, List<ActivityDto> Activities, List<EnrollmentDto> Enrollments);
+    public record ActivityDto(Guid Id, string Title, string Description, int RequiredVolunteers, string? StartTime, string? EndTime, string MaterialsNeeded, string SafetyInstructions, int? EstimatedDurationMinutes, bool IsCompleted, string ToolsProvided);
+    public record WorkDayDto(Guid Id, DateTime Date, string CoordinatorName, string OpenerName, string OpenTime, string CloserName, string CloseTime, List<ActivityDto> Activities, List<EnrollmentDto> Enrollments);
     public record UserOptionDto(Guid Id, string FirstName, string LastName, string Email, string? PhoneNumber);
 }
 
@@ -50,7 +50,9 @@ public record CreateWorkDayDto(DateTime Date);
 public record UpdateWorkDayResponsiblesDto(
     string? CoordinatorName,
     string? OpenerName,
-    string? CloserName
+    string? OpenTime,
+    string? CloserName,
+    string? CloseTime
 );
 
 public record CreateActivityDto(
@@ -58,6 +60,8 @@ public record CreateActivityDto(
     string Title,
     string Description,
     int RequiredVolunteers,
+    string? StartTime,
+    string? EndTime,
     string MaterialsNeeded,
     string? SafetyInstructions,
     int? EstimatedDurationMinutes

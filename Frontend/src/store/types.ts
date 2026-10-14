@@ -20,7 +20,11 @@ export interface Activity {
   id: string;
   title: string;
   description: string;
+  /** 0 = geen limiet */
   requiredVolunteers: number;
+  /** "HH:mm"; null = hele dag */
+  startTime: string | null;
+  endTime: string | null;
   materialsNeeded: string;
   safetyInstructions: string;
   estimatedDurationMinutes: number | null;
@@ -33,7 +37,9 @@ export interface WorkDay {
   date: string;
   coordinatorName: string;
   openerName: string;
+  openTime: string;
   closerName: string;
+  closeTime: string;
   activities: Activity[];
   enrollments: Enrollment[];
 }
@@ -71,6 +77,8 @@ export interface ActivityPayload {
   title: string;
   description: string;
   requiredVolunteers: number;
+  startTime: string | null;
+  endTime: string | null;
   materialsNeeded: string;
   safetyInstructions: string;
   estimatedDurationMinutes: number | null;
@@ -79,5 +87,7 @@ export interface ActivityPayload {
 export interface ResponsiblesPayload {
   coordinatorName: string;
   openerName: string;
+  openTime: string;
   closerName: string;
+  closeTime: string;
 }

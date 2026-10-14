@@ -28,6 +28,10 @@ namespace KerkPlanner.Api.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("EndTime")
+                        .HasMaxLength(5)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("EstimatedDurationMinutes")
                         .HasColumnType("INTEGER");
 
@@ -44,6 +48,10 @@ namespace KerkPlanner.Api.Migrations
                     b.Property<string>("SafetyInstructions")
                         .IsRequired()
                         .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StartTime")
+                        .HasMaxLength(5)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -171,6 +179,11 @@ namespace KerkPlanner.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CloseTime")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CloserName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -182,6 +195,11 @@ namespace KerkPlanner.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OpenTime")
+                        .IsRequired()
+                        .HasMaxLength(5)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("OpenerName")

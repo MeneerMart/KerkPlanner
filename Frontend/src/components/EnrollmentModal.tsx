@@ -153,7 +153,7 @@ export function EnrollmentModal({
                 onChange={setSelectedTools}
                 excludeEnrollmentId={existingEnrollment?.id}
               />
-              <EnrollmentDetailsFields idPrefix={`enroll-${day.id}-${activity?.id ?? 'general'}`} value={details} onChange={setDetails} />
+              <EnrollmentDetailsFields idPrefix={`enroll-${day.id}-${activity?.id ?? 'general'}`} value={details} onChange={setDetails} showTimeSlot={!activity?.startTime} />
               {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             </FieldGroup>
             <DialogFooter>

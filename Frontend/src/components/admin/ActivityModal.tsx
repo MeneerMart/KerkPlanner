@@ -19,6 +19,15 @@ function hoursToMinutes(hours: string): number | null {
   return Number.isFinite(value) && value > 0 ? Math.round(value * 60) : null;
 }
 
+function CheckboxLabel({ id, checked, onChange, children }: { id: string; checked: boolean; onChange: (checked: boolean) => void; children: React.ReactNode }) {
+  return (
+    <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+      <input id={id} type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} className="h-4 w-4 accent-blue-600" />
+      {children}
+    </label>
+  );
+}
+
 function minutesToHours(minutes: number | null): string {
   return minutes ? String(Math.round((minutes / 60) * 100) / 100) : '';
 }
@@ -29,6 +38,10 @@ export default function ActivityModal({ dayId, activity }: { dayId: string; acti
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [volunteers, setVolunteers] = useState('1');
+  const [unlimited, setUnlimited] = useState(false);
+  const [allDay, setAllDay] = useState(true);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [durationHours, setDurationHours] = useState('');
   const [safetyInstructions, setSafetyInstructions] = useState('');
   const [materials, setMaterials] = useState<ToolRequirementDraft[]>([]);
@@ -40,7 +53,12 @@ export default function ActivityModal({ dayId, activity }: { dayId: string; acti
     if (nextOpen) {
       setTitle(activity?.title ?? '');
       setDescription(activity?.description ?? '');
-      setVolunteers(String(activity?.requiredVolunteers ?? 1));
+      const requiredVolunteers = activity?.requiredVolunteers ?? 1;
+      setUnlimited(requiredVolunteers <= 0);
+      setVolunteers(String(requiredVolunteers > 0 ? requiredVolunteers : 1));
+      setAllDay(!activity?.startTime);
+      setStartTime(activity?.startTime ?? '');
+      setEndTime(activity?.endTime ?? '');
       setDurationHours(minutesToHours(activity?.estimatedDurationMinutes ?? null));
       setSafetyInstructions(activity?.safetyInstructions ?? '');
       setMaterials(parseToolRequirements(activity?.materialsNeeded).map(material => ({ name: material.name, amount: String(material.amount) })));
@@ -51,14 +69,20 @@ export default function ActivityModal({ dayId, activity }: { dayId: string; acti
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSaving(true);
     setError('');
+    if (!allDay && (!startTime || !endTime || startTime >= endTime)) {
+      setError('Vul een begin- en eindtijd in, waarbij de eindtijd na de begintijd ligt.');
+      return;
+    }
+    setSaving(true);
 
     const payload: ActivityPayload = {
       workDayId: dayId,
       title: title.trim(),
       description,
-      requiredVolunteers: Math.max(1, Number.parseInt(volunteers, 10) || 1),
+      requiredVolunteers: unlimited ? 0 : Math.max(1, Number.parseInt(volunteers, 10) || 1),
+      startTime: allDay ? null : startTime,
+      endTime: allDay ? null : endTime,
       materialsNeeded: JSON.stringify(
         materials
           .filter(material => material.name.trim())
@@ -104,10 +128,29 @@ export default function ActivityModal({ dayId, activity }: { dayId: string; acti
               <Label htmlFor={`${idPrefix}-description`}>Omschrijving</Label>
               <Textarea id={`${idPrefix}-description`} maxLength={500} rows={3} value={description} onChange={event => setDescription(event.target.value)} />
             </Field>
+            <div className="space-y-2 rounded-md border border-slate-200 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <Label>Tijdstip</Label>
+                <CheckboxLabel id={`${idPrefix}-allday`} checked={allDay} onChange={setAllDay}>Hele dag</CheckboxLabel>
+              </div>
+              {!allDay && (
+                <div className="grid grid-cols-2 gap-3">
+                  <Field>
+                    <Label htmlFor={`${idPrefix}-start`} className="text-xs text-slate-500">Van</Label>
+                    <Input id={`${idPrefix}-start`} type="time" required value={startTime} onChange={event => setStartTime(event.target.value)} />
+                  </Field>
+                  <Field>
+                    <Label htmlFor={`${idPrefix}-end`} className="text-xs text-slate-500">Tot</Label>
+                    <Input id={`${idPrefix}-end`} type="time" required value={endTime} onChange={event => setEndTime(event.target.value)} />
+                  </Field>
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <Field>
                 <Label htmlFor={`${idPrefix}-volunteers`}>Vrijwilligers nodig</Label>
-                <Input id={`${idPrefix}-volunteers`} type="number" min="1" step="1" required value={volunteers} onChange={event => setVolunteers(event.target.value)} />
+                <Input id={`${idPrefix}-volunteers`} type="number" min="1" step="1" required={!unlimited} disabled={unlimited} value={unlimited ? '' : volunteers} placeholder={unlimited ? 'Geen limiet' : undefined} onChange={event => setVolunteers(event.target.value)} />
+                <CheckboxLabel id={`${idPrefix}-unlimited`} checked={unlimited} onChange={setUnlimited}>Geen limiet</CheckboxLabel>
               </Field>
               <Field>
                 <Label htmlFor={`${idPrefix}-duration`}>Geschatte duur (uren)</Label>

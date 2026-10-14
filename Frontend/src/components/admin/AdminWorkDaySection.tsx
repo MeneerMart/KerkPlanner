@@ -10,10 +10,10 @@ import ConfirmDeleteButton from './ConfirmDeleteButton';
 import ResponsiblesModal from './ResponsiblesModal';
 import { Card, CardContent } from '../ui/card';
 
-export default function AdminWorkDaySection({ day, userNames }: { day: WorkDay; userNames: string[] }) {
+export default function AdminWorkDaySection({ day }: { day: WorkDay }) {
   const deleteWorkDay = useAppStore(state => state.deleteWorkDay);
   const generalEnrollments = day.enrollments.filter(enrollment => enrollment.activityId === null);
-  const hasResponsibles = day.coordinatorName || day.openerName || day.closerName;
+  const hasResponsibles = day.coordinatorName || day.openerName || day.openTime || day.closerName || day.closeTime;
 
   return (
     <div className="border-t-2 pt-6">
@@ -31,7 +31,7 @@ export default function AdminWorkDaySection({ day, userNames }: { day: WorkDay; 
             />
           </h3>
           <div className="flex flex-wrap gap-2">
-            <ResponsiblesModal day={day} userNames={userNames} />
+            <ResponsiblesModal day={day} />
             <ActivityModal dayId={day.id} />
           </div>
         </div>
