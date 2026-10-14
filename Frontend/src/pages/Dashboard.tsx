@@ -5,6 +5,7 @@ import { formatDay } from '../lib/format';
 import ActivityCard from '../components/planning/ActivityCard';
 import GeneralAvailabilityCard from '../components/planning/GeneralAvailabilityCard';
 import DayResponsibles from '../components/DayResponsibles';
+import AnnouncementBanner from '../components/AnnouncementBanner';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 
@@ -33,6 +34,8 @@ export default function Dashboard() {
           <Button onClick={() => navigate('/login')} variant="outline" className="w-full bg-white sm:w-auto">Inloggen of registreren</Button>
         </div>
       )}
+
+      <AnnouncementBanner />
 
       <div className="flex items-end justify-between gap-3">
         <div>

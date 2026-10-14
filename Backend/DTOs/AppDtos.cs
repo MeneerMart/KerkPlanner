@@ -81,3 +81,5 @@ public record AdminCreateGuestEnrollmentDto(
     string? SpecificSkills,
     string? Remarks
 );
+
+public record AnnouncementDto(string Title, string Message);
