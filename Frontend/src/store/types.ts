@@ -84,6 +84,11 @@ export interface ActivityPayload {
   estimatedDurationMinutes: number | null;
 }
 
+export interface Announcement {
+  title: string;
+  message: string;
+}
+
 export interface ResponsiblesPayload {
   coordinatorName: string;
   openerName: string;

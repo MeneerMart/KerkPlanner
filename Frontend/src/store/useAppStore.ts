@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { jwtDecode } from 'jwt-decode';
 import type {
   ActivityPayload,
+  Announcement,
   AdminEnrollmentPayload,
   AdminGuestEnrollmentPayload,
   EnrollmentPayload,
@@ -23,11 +24,14 @@ interface AuthState {
 interface AppStore extends AuthState {
   workDays: WorkDay[];
   users: UserOption[];
+  announcement: Announcement;
   isLoading: boolean;
   login: (token: string, firstName: string, role: string) => void;
   logout: () => void;
   fetchPlanning: () => Promise<void>;
   fetchUsers: () => Promise<void>;
+  fetchAnnouncement: () => Promise<void>;
+  updateAnnouncement: (data: Announcement) => Promise<void>;
   enroll: (data: EnrollmentPayload) => Promise<void>;
   updateEnrollment: (id: string, data: EnrollmentPayload) => Promise<void>;
   deleteEnrollment: (id: string) => Promise<void>;
@@ -74,6 +78,7 @@ export const useAppStore = create<AppStore>((set, get) => {
     userId: getInitialUserId(token),
     workDays: [],
     users: [],
+    announcement: { title: '', message: '' },
     isLoading: false,
 
     login: (newToken, firstName, role) => {
@@ -107,6 +112,26 @@ export const useAppStore = create<AppStore>((set, get) => {
         set({ users: response.data });
       } catch (error) {
         console.error('Fout bij ophalen gebruikers', error);
+        throw error;
+      }
+    },
+
+    fetchAnnouncement: async () => {
+      try {
+        const response = await api.get<Announcement>('/announcement');
+        set({ announcement: response.data });
+      } catch (error) {
+        // Zonder mededeling werkt de planning gewoon; alleen loggen.
+        console.error('Fout bij ophalen mededeling', error);
+      }
+    },
+
+    updateAnnouncement: async (data) => {
+      try {
+        await api.put('/announcement', data);
+        set({ announcement: data });
+      } catch (error) {
+        console.error('Fout bij opslaan mededeling', error);
         throw error;
       }
     },

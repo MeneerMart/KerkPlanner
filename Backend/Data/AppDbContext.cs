@@ -12,10 +12,14 @@ namespace Backend.Data
         public DbSet<WorkDay> WorkDays { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Vaste Id; de database moet hem niet zelf ophogen.
+            modelBuilder.Entity<Announcement>().Property(a => a.Id).ValueGeneratedNever();
 
             // Een inschrijving kan bij een account horen, maar ook een handmatig toegevoegde gast zijn.
             modelBuilder.Entity<Enrollment>()
