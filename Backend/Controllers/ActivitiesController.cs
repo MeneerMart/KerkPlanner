@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
+using Backend.Services;
 
 namespace Backend.Controllers
 {
@@ -69,7 +70,13 @@ namespace Backend.Controllers
         private BadRequestObjectResult? Validate(CreateActivityDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest("Een taaknaam is verplicht.");
-            if (dto.RequiredVolunteers < 1) return BadRequest("Het aantal vrijwilligers moet minimaal 1 zijn.");
+            if (dto.RequiredVolunteers < 0) return BadRequest("Het aantal vrijwilligers kan niet negatief zijn.");
+            if (!TimeOfDay.TryNormalize(dto.StartTime, out var start) || !TimeOfDay.TryNormalize(dto.EndTime, out var end))
+                return BadRequest("Vul een geldige tijd in (uu:mm).");
+            if ((start == null) != (end == null))
+                return BadRequest("Vul zowel een begin- als eindtijd in, of kies 'hele dag'.");
+            if (start != null && string.CompareOrdinal(start, end) >= 0)
+                return BadRequest("De eindtijd moet na de begintijd liggen.");
             if (dto.SafetyInstructions?.Trim().Length > MaxSafetyInstructionsLength)
                 return BadRequest($"De veiligheidsinstructies mogen maximaal {MaxSafetyInstructionsLength} tekens bevatten.");
             if (dto.EstimatedDurationMinutes is < 1 or > MaxDurationMinutes)
@@ -82,6 +89,10 @@ namespace Backend.Controllers
             activity.Title = dto.Title.Trim();
             activity.Description = dto.Description ?? "";
             activity.RequiredVolunteers = dto.RequiredVolunteers;
+            TimeOfDay.TryNormalize(dto.StartTime, out var start);
+            TimeOfDay.TryNormalize(dto.EndTime, out var end);
+            activity.StartTime = start;
+            activity.EndTime = end;
             activity.MaterialsNeeded = dto.MaterialsNeeded ?? "[]";
             activity.SafetyInstructions = dto.SafetyInstructions?.Trim() ?? "";
             activity.EstimatedDurationMinutes = dto.EstimatedDurationMinutes;

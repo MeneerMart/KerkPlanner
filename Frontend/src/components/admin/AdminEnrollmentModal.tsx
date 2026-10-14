@@ -114,7 +114,7 @@ export default function AdminEnrollmentModal({
               quantities={quantities}
               onChange={setQuantities}
             />
-            <EnrollmentDetailsFields idPrefix={idPrefix} value={details} onChange={setDetails} />
+            <EnrollmentDetailsFields idPrefix={idPrefix} value={details} onChange={setDetails} showTimeSlot={!activity?.startTime} />
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
           </FieldGroup>
           <DialogFooter>

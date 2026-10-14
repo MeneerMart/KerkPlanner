@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useAppStore } from '../../store/useAppStore';
 import type { Activity, WorkDay } from '../../store/types';
 import { errorMessage } from '../../lib/errors';
+import { hasNoLimit } from '../../lib/format';
 import ActivityInfo from '../ActivityInfo';
 import ActivityModal from './ActivityModal';
 import AdminEnrollmentModal from './AdminEnrollmentModal';
@@ -35,7 +36,7 @@ export default function AdminActivityCard({ day, activity }: { day: WorkDay; act
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div>
           <CardTitle className={`text-base ${activity.isCompleted ? 'text-slate-500 line-through' : 'text-slate-800'}`}>{activity.title}</CardTitle>
-          <p className="mt-1 text-xs text-slate-500">Capaciteit: {enrollments.length}/{activity.requiredVolunteers} personen</p>
+          <p className="mt-1 text-xs text-slate-500">{hasNoLimit(activity) ? `${enrollments.length} aangemeld · geen limiet` : `Capaciteit: ${enrollments.length}/${activity.requiredVolunteers} personen`}</p>
         </div>
         <div className="flex gap-1">
           <ActivityModal dayId={day.id} activity={activity} />

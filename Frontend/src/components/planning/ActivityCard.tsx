@@ -1,6 +1,6 @@
 import { CheckCircle2, Users } from 'lucide-react';
 import type { Activity, Enrollment, WorkDay } from '../../store/types';
-import { nameWithTimeSlot } from '../../lib/format';
+import { hasNoLimit, nameWithTimeSlot } from '../../lib/format';
 import { EnrollmentModal } from '../EnrollmentModal';
 import ActivityInfo from '../ActivityInfo';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -9,7 +9,8 @@ import { Badge } from '../ui/badge';
 export default function ActivityCard({ day, activity, userId }: { day: WorkDay; activity: Activity; userId: string | null }) {
   const enrolledHere: Enrollment[] = day.enrollments.filter(enrollment => enrollment.activityId === activity.id);
   const ownEnrollment = userId ? enrolledHere.find(enrollment => enrollment.userId === userId) : undefined;
-  const isFull = enrolledHere.length >= activity.requiredVolunteers;
+  const unlimited = hasNoLimit(activity);
+  const isFull = !unlimited && enrolledHere.length >= activity.requiredVolunteers;
 
   return (
     <Card className={`border-l-4 ${activity.isCompleted ? 'border-l-slate-400 opacity-75' : 'border-l-blue-500'}`}>
@@ -23,7 +24,7 @@ export default function ActivityCard({ day, activity, userId }: { day: WorkDay; 
             <Badge variant="secondary" className="whitespace-nowrap bg-slate-100 text-slate-700">Afgerond</Badge>
           ) : (
             <Badge variant={isFull ? 'secondary' : 'default'} className={`whitespace-nowrap ${isFull ? 'bg-slate-100 text-slate-800' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}>
-              {enrolledHere.length} / {activity.requiredVolunteers}
+              {unlimited ? `${enrolledHere.length} · geen limiet` : `${enrolledHere.length} / ${activity.requiredVolunteers}`}
             </Badge>
           )}
         </div>

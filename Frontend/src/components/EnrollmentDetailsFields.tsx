@@ -11,8 +11,10 @@ export default function EnrollmentDetailsFields({
   idPrefix,
   value,
   onChange,
+  showTimeSlot = true,
 }: {
   idPrefix: string;
+  showTimeSlot?: boolean;
   value: EnrollmentDetails;
   onChange: (next: EnrollmentDetails) => void;
 }) {
@@ -21,12 +23,12 @@ export default function EnrollmentDetailsFields({
 
   return (
     <>
-      <Field>
+      {showTimeSlot && <Field>
         <Label htmlFor={`${idPrefix}-timeslot`}>Wanneer kun je?</Label>
         <NativeSelect id={`${idPrefix}-timeslot`} value={value.timeSlot} onChange={event => update('timeSlot', event.target.value as TimeSlot)}>
           {TIME_SLOTS.map(slot => <option key={slot.value} value={slot.value}>{slot.label}</option>)}
         </NativeSelect>
-      </Field>
+      </Field>}
       <Field>
         <Label htmlFor={`${idPrefix}-skills`}>Vaardigheden (optioneel)</Label>
         <Input id={`${idPrefix}-skills`} maxLength={250} placeholder="Bijv. timmerman, elektricien, BHV" value={value.specificSkills} onChange={event => update('specificSkills', event.target.value)} />

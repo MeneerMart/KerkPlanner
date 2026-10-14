@@ -15,7 +15,15 @@ namespace Backend.Models
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;
         
+        // 0 betekent 'geen limiet': iedereen kan zich aanmelden.
         public int RequiredVolunteers { get; set; }
+
+        // Tijdstip als "HH:mm"; beide null betekent dat de taak de hele dag loopt.
+        [MaxLength(5)]
+        public string? StartTime { get; set; }
+
+        [MaxLength(5)]
+        public string? EndTime { get; set; }
         
         public string MaterialsNeeded { get; set; } = string.Empty;
 

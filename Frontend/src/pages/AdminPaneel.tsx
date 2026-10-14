@@ -1,18 +1,14 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import NewWorkDayForm from '../components/admin/NewWorkDayForm';
 import AdminWorkDaySection from '../components/admin/AdminWorkDaySection';
 
 export default function AdminPaneel() {
-  const { workDays, users, fetchPlanning, fetchUsers } = useAppStore();
+  const { workDays, fetchPlanning } = useAppStore();
 
   useEffect(() => {
     void fetchPlanning();
-    // De gebruikerslijst is alleen voor naamsuggesties; zonder lijst werkt het formulier gewoon.
-    fetchUsers().catch(() => undefined);
-  }, [fetchPlanning, fetchUsers]);
-
-  const userNames = useMemo(() => users.map(user => `${user.firstName} ${user.lastName}`.trim()), [users]);
+  }, [fetchPlanning]);
 
   return (
     <div className="space-y-6">
@@ -25,7 +21,7 @@ export default function AdminPaneel() {
 
       {workDays.length === 0 && <p className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-500">Er zijn geen toekomstige werkdagen ingepland.</p>}
       <div className="space-y-8">
-        {workDays.map(day => <AdminWorkDaySection key={day.id} day={day} userNames={userNames} />)}
+        {workDays.map(day => <AdminWorkDaySection key={day.id} day={day} />)}
       </div>
     </div>
   );

@@ -19,6 +19,13 @@ namespace Backend.Models
         [MaxLength(100)]
         public string CloserName { get; set; } = string.Empty;
 
+        // Tijdstippen als "HH:mm"; leeg als die nog niet bekend zijn.
+        [MaxLength(5)]
+        public string OpenTime { get; set; } = string.Empty;
+
+        [MaxLength(5)]
+        public string CloseTime { get; set; } = string.Empty;
+
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
     }
