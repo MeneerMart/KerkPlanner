@@ -69,6 +69,26 @@ namespace KerkPlanner.Api.Migrations
                     b.ToTable("Activities");
                 });
 
+            modelBuilder.Entity("Backend.Models.Announcement", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Announcements");
+                });
+
             modelBuilder.Entity("Backend.Models.Enrollment", b =>
                 {
                     b.Property<Guid>("Id")
