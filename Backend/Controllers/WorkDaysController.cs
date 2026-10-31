@@ -31,7 +31,7 @@ namespace Backend.Controllers
                 .OrderBy(w => w.Date)
                 .ToListAsync();
 
-            // Verberg verlopen dagen direct; de hosted service ruimt ze ook fysiek op.
+            // Verlopen dagen worden verborgen maar blijven bewaard in de database.
             workDays = workDays.Where(w => w.Date.Date >= DateTime.Today).ToList();
 
             var result = workDays.Select(w => new WorkDayDto(

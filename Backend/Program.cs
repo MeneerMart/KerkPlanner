@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Backend.Data;
-using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection ontbreekt.");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
-builder.Services.AddHostedService<PastWorkDayCleanupService>();
 
 // 2. CORS configuratie: toegestane frontend-adressen staan in Cors:AllowedOrigins
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
